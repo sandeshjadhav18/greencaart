@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenCaart | Premium Seeds & Gardening</title>
+    <style>
+        :root {
+            --primary-green: #2D5A27;
+            --secondary-green: #407939;
+            --sale-red: #d9534f;
+            --best-seller: #FFD700;
+            --bg-light: #F8F9FA;
+            --border: #e0e0e0;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg-light); color: #333; overflow-x: hidden; }
+
+        /* --- Navigation & Search --- */
+        nav {
+            background: var(--white);
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary-green); letter-spacing: -1px; }
+        
+        .search-container { flex-grow: 1; max-width: 450px; margin: 0 15px; }
+        #search-bar {
+            width: 100%;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            outline: none;
+            background: #f1f3f1;
+        }
+
+        .cart-trigger { 
+            background: var(--primary-green); 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            position: relative;
+            font-weight: 600;
+        }
+
+        #cart-count { margin-left: 5px; background: white; color: var(--primary-green); padding: 2px 7px; border-radius: 50%; font-size: 0.8rem; }
+
+        /* --- Product Grid --- */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        
+        .discount-badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: var(--sale-red);
+            color: white;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            z-index: 2;
+        }
+
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; }
+        .best-seller-tag { background: var(--best-seller); font-size: 0.65rem; font-weight: bold; padding: 3px 8px; display: inline-block; margin-bottom: 5px; border-radius: 4px; }
+        .rating { color: #f39c12; font-size: 0.8rem; margin-bottom: 5px; }
+        .product-title { font-size: 0.9rem; line-height: 1.4; height: 50px; overflow: hidden; margin-bottom: 10px; font-weight: 600; }
+
+        .price-row { margin-bottom: 15px; }
+        .sale-price { font-size: 1.2rem; font-weight: 800; color: var(--primary-green); }
+        .reg-price { font-size: 0.9rem; text-decoration: line-through; color: #999; margin-left: 8px; }
+
+        .add-to-cart-btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+            margin-top: auto;
+        }
+
+        /* --- Cart & Form Sidebar --- */
+        #cart-sidebar {
+            position: fixed;
+            right: -100%; top: 0;
+            width: 380px; height: 100%;
+            background: var(--white);
+            z-index: 2000;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            transition: 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        #cart-sidebar.active { right: 0; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; }
+
+        #order-form input, #order-form textarea {
+            width: 100%; padding: 12px; margin-bottom: 12px;
+            border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;
+        }
+
+        .checkout-footer { border-top: 2px solid #eee; padding-top: 15px; margin-top: auto; }
+
+        @media (max-width: 480px) { #cart-sidebar { width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">GreenCaart</div>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search Seeds (टमाटर, मिर्च...)" onkeyup="handleSearch()">
+        </div>
+        <button class="cart-trigger" onclick="toggleCart()">🛒 Cart <span id="cart-count">0</span></button>
+    </nav>
+
+    <div class="container">
+        <h2 style="margin-bottom: 25px; color: var(--primary-green);">Bestselling Seeds</h2>
+        <div class="product-grid" id="product-grid"></div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+    <div id="cart-sidebar">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Your Order</h3>
+            <button onclick="toggleCart()" style="border:none; background:none; font-size:1.8rem; cursor:pointer;">&times;</button>
+        </div>
+
+        <div id="cart-items" style="flex-grow: 1; overflow-y: auto; margin-bottom: 20px;">
+            <p style="text-align:center; color:#999; margin-top:50px;">Your cart is empty.</p>
+        </div>
+
+        <form action="https://api.web3forms.com/submit" method="POST" id="order-form">
+            <input type="hidden" name="access_key" value="0cb27db8-fe51-4ec7-8597-2bf3d3794892">
+            <input type="hidden" name="order_summary" id="hidden-order-data">
+            
+            <input type="text" name="name" placeholder="Full Name" required>
+            
+            <input type="tel" name="phone" placeholder="10-Digit Mobile Number" 
+                   pattern="[6-9]{1}[0-9]{9}" 
+                   title="Please enter a valid 10-digit Indian phone number" required>
+            
+            <textarea name="address" placeholder="Delivery Address" required rows="3"></textarea>
+
+            <div class="checkout-footer">
+                <div style="display:flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px;">
+                    <span>Total:</span>
+                    <span>₹<span id="cart-total">0.00</span></span>
+                </div>
+                <button type="submit" id="submit-order" class="add-to-cart-btn" style="width:100%;" disabled>
+                    Confirm Order
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, name: "Aamla Hybrid Seeds - 50 Seeds (आमला के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.07 | 103", bestSeller: true, img: "amla.jpg" },
+            { id: 2, name: "Okra Hybrid (bhindi) Seeds - 50 Seeds (भिंडी के बीज)", price: 65, oldPrice: 99, discount: "34%", rating: "4.33 | 73", img: "okra.jpg" },
+            { id: 3, name: "Cucumber Hybrid Seeds - 20 Seeds (खीरा के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.13 | 46", img: "cucumber.jpg" },
+            { id: 4, name: "Coriander (Dhaniya) Seeds - 1000 Seeds (धनिया के बीज)", price: 59, oldPrice: 99, discount: "40%", rating: "4.74 | 89", img: "coriander.jpg" },
+            { id: 5, name: "Spinach (Palak) Seeds - 750 Seeds (पालक के बीज)", price: 65, oldPrice: 99, discount: "34%", rating: "4.72 | 81", img: "spanich.jpg" },
+            { id: 6, name: "Brinjal Seeds Black - 50 Seeds (ब्लैक बैंगन के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "3.98 | 48", img: "brinjal black.jpg" },
+            { id: 7, name: "Capsicum F1 Hybrid - 30 Seeds (हरी शिमला मिर्च)", price: 120, oldPrice: 149, discount: "19%", rating: "4.63 | 59", img: "capcicum.jpg" },
+            { id: 8, name: "French Beans Seeds - 20 Seeds (फ्रेंच बीन्स के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.24 | 38", img: "french beans.jpg" },
+            { id: 9, name: "Chilli Jwala Seeds - 50 Seeds (हरी मिर्च के बीज)", price: 49, oldPrice: 120, discount: "59%", rating: "3.87 | 39", img: "chilli jwala.jpg" },
+            { id: 10, name: "Bottle Gourd (Lauki) Seeds - 12 Seeds (लौकी के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.52 | 52", img: "bottle gourd.jpg" },
+            { id: 11, name: "Cherry Tomato Seeds - 50 Seeds (चेरी टमाटर के बीज)", price: 65, oldPrice: 99, discount: "34%", rating: "4.86 | 43", img: "cherry tomato.jpg" },
+            { id: 12, name: "Bellpepper Mixed - 30 Seeds (शिमला मिर्च के बीज)", price: 120, oldPrice: 179, discount: "33%", rating: "3.76 | 51", img: "bellpaper.jpg" },
+            { id: 13, name: "Cauliflower Seeds - 150 Seeds (फूलगोभी के बीज)", price: 97, oldPrice: 149, discount: "35%", rating: "4.69 | 59", img: "cauliflower.jpg" },
+            { id: 14, name: "Broccoli Seeds - 150 Seeds (हरी गोभी के बीज)", price: 117, oldPrice: 199, discount: "41%", rating: "4.62 | 55", img: "broccoli.jpg" },
+            { id: 15, name: "Bitter Gourd (Karela) - 12 Seeds (करेला के बीज)", price: 89, oldPrice: 129, discount: "31%", rating: "4.49 | 43", img: "bitter gourd.jpg" },
+            { id: 16, name: "Lettuce Iceberg - 300 Seeds (सलाद पत्ता के बीज)", price: 69, oldPrice: 120, discount: "43%", rating: "3.87 | 38", img: "iceberg lattece.jpg" },
+            { id: 17, name: "Peas (Matar) Seeds - 50 Seeds (मटर के बीज)", price: 117, oldPrice: 199, discount: "41%", rating: "4.62 | 55", img: "peas.jpg" },
+            { id: 18, name: "Radish (Mooli) Seeds White Long - 250 Seeds (मूली के बीज)", price: 89, oldPrice: 129, discount: "10%", rating: "4.49 | 43", img: "radish.jpg" },
+            { id: 19, name: "Pumpkin (kaddu) Seeds - 12 Seeds (कद्दू के बीज) ", price: 117, oldPrice: 199, discount: "41%", rating: "4.62 | 55", img: "pumpkin.jpg" },
+            { id: 20, name: "Ridge gourd or Luffa (Turai) Seeds - 12 Seeds (तुरई के बीज) ", price: 89, oldPrice: 129, discount: "13%", rating: "4.49 | 43", img: "ridge gourd.jpg" },
+            { id: 21, name: "Carrot Red Seeds - 1000 Seeds (Laal Gajar/लाल गाजर के बीज)", price: 89, oldPrice: 129, discount: "16%", rating: "4.49 | 43", img: "carrot red.jpg" },
+            { id: 22, name: "Cabbage (Patta Gobhi) Seeds - 150 Seeds (Hari Patta Gobhi/हरी पत्ता गोभी के बीज)) ", price: 117, oldPrice: 199, discount: "41%", rating: "4.62 | 55", img: "cabbage.jpg" },
+            { id: 23, name: "Sponge Gourd (luffa or gilki) Seeds - 12 Seeds (गिलकी के बीज)  ", price: 89, oldPrice: 129, discount: "19%", rating: "4.49 | 43", img: "spoonge gourd.jpg" },
+            { id: 24, name: "Pak Choi (Bok Choi) Seeds - 150 Seeds (पाक चोई के बीज)  ", price: 53, oldPrice: 129, discount: "11%", rating: "4.49 | 43", img: "pak choi.jpg" },
+            { id: 25, name: "Moringa Drumstick Seeds (Saijan) - 10 Seeds (सहजन/मोरिंगा के बीज)  ", price: 72, oldPrice: 129, discount: "12%", rating: "4.4 | 43", img: "moringa.jpg" },
+            { id: 26, name: "Kakri Long Melon Seeds - 20 Seeds (Kakdi/ककड़ी के बीज)  ", price: 90, oldPrice: 149, discount: "31%", rating: "4.1 | 43", img: "long kakri.jpg" },
+            { id: 27, name: "Sem Phali/Lima Beans Seeds Bush Type - 20 Seeds (सेम फली के बीज) ", price: 89, oldPrice: 134, discount: "16%", rating: "4.9 | 43", img: "sem phali.jpg" },
+            { id: 28, name: "Red amaranth (lal bhaji) Seeds - 5g (लाल चौलाई भाजी के बीज)", price: 96, oldPrice: 142, discount: "31%", rating: "4.49 | 43", img: "red amarnath.jpg" },
+            { id: 29, name: "Gwar Phali Seeds - 50 Seeds (Cluster Beans/क्लस्टर बीन्स/ग्वार फली के बीज) ", price: 89, oldPrice: 129, discount: "31%", rating: "4.49 | 43", img: "gwarphali.jpg" },
+            { id: 30, name: "Cabbage Red Seeds - 150 Seeds (Lal Patta gobhi) (लाल पत्ता गोभी के बीज)", price: 65, oldPrice: 99, discount: "34%", rating: "4.72 | 81", img: "cabbge red.jpg" },
+            { id: 31, name: "Cowpea (Lobia Beans) Seeds - 50 Seeds (Barbati/ लोबिया/बरबटी के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "3.98 | 48", img: "cowpea.jpg" },
+            { id: 32, name: "Chilli Achari Seeds - (50 Seeds) High Yield/ High Germination (Achari Mirch/ अचारी मिर्च के बीज)", price: 120, oldPrice: 149, discount: "19%", rating: "4.63 | 59", img: "chilli achri.jpg" },
+            { id: 33, name: "Carrot Orange Seeds - 1000 Seeds (Gajar/गाजर के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.24 | 38", img: "carrot orange.jpg" },
+            { id: 34, name: "Sweet Corn (Makka) Seeds - 50 Seeds (मक्का के बीज) ", price: 49, oldPrice: 120, discount: "59%", rating: "3.87 | 39", img: "sweet corn.jpg" },
+            { id: 35, name: "Ornamental Chilly Choice Mix Seeds - (50 Seeds) High Yield | High Germination | Best for Home Gardens (मिर्च के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.52 | 52", img: "ornamental chilly.jpg" },
+            { id: 36, name: "Yellow Grapes Cherry Tomato Seeds (F1 Hybrid) - 30 Seeds (Tamatar/टमाटर के बीज)", price: 59, oldPrice: 99, discount: "40%", rating: "4.74 | 89", img: "yellow grapes.jpg" },
+            { id: 37, name: "Tinda (Apple gourds) Seeds - 30 Seeds (टिंडा के बीज)", price: 65, oldPrice: 99, discount: "34%", rating: "4.72 | 81", img: "tinda.jpg" },
+            { id: 38, name: "Purple Cauliflower (Bainganee Phool gobhi) Seeds - 40 Seeds (बैंगनी फूल गोभी)", price: 69, oldPrice: 99, discount: "30%", rating: "3.98 | 48", img: "cauliflower purple.jpg" },
+            { id: 39, name: "Knol Khol (kohlrabi) Seeds - 150N (Ganth Gobhi/गांठ गोभी के बीज)", price: 120, oldPrice: 149, discount: "19%", rating: "4.63 | 59", img: "knol khol.jpg" },
+            { id: 40, name: "Zucchini Yellow Seeds - 15 Seeds (पीली जुकिनी के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.24 | 38", img: "zuchini yellow.jpg" },
+            { id: 41, name: "Tomato Oval Red Seeds - 50 Seeds (Tamatar/टमाटर के बीज)", price: 49, oldPrice: 120, discount: "59%", rating: "3.87 | 39", img: "oval tomato.jpg" },
+            { id: 42, name: "Capsicum Red ( Lal Shimla Mirch) Seeds - (30 Seeds) High Yield | High Germination | Best for Home Gardens ( लाल शिमला मिर्च के बीज)", price: 69, oldPrice: 99, discount: "30%", rating: "4.52 | 52", img: "capcicum red.jpg" },
+        ];
+
+        let cart = [];
+
+        function renderProducts(data = products) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = data.map(p => `
+                <div class="product-card">
+                    <div class="discount-badge">-${p.discount}</div>
+                    <img src="${p.img}" alt="${p.name}" loading="lazy">
+                    <div class="product-info">
+                        ${p.bestSeller ? '<span class="best-seller-tag">BEST SELLER</span>' : ''}
+                        <div class="rating">★ ${p.rating}</div>
+                        <h3 class="product-title">${p.name}</h3>
+                        <div class="price-row">
+                            <span class="sale-price">₹${p.price.toFixed(2)}</span>
+                            <span class="reg-price">₹${p.oldPrice.toFixed(2)}</span>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">Add to cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateUI();
+            if(!document.getElementById('cart-sidebar').classList.contains('active')) toggleCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const itemsDiv = document.getElementById('cart-items');
+            const submitBtn = document.getElementById('submit-order');
+            
+            if(cart.length === 0) {
+                itemsDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Your cart is empty.</p>';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = "0.5";
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+                itemsDiv.innerHTML = cart.map((item, index) => `
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; font-size:0.85rem;">
+                        <span style="width:70%">${item.name}</span>
+                        <b>₹${item.price}</b>
+                        <button onclick="removeItem(${index})" style="border:none; color:red; background:none; cursor:pointer;">&times;</button>
+                    </div>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cart-total').innerText = total.toFixed(2);
+            
+            // Sync with Hidden Web3Form Input
+            const summary = cart.map(i => `${i.name} (₹${i.price})`).join(', ');
+            document.getElementById('hidden-order-data').value = `Total Items: ${cart.length} | Items: ${summary} | Total: ₹${total.toFixed(2)}`;
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('search-bar').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-sidebar').classList.toggle('active');
+            const overlay = document.getElementById('overlay');
+            overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
